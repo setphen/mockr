@@ -1,0 +1,18 @@
+html, body{
+    //border: 10px solid $primary;
+    margin:0;
+    padding:0;
+    overflow:hidden;
+}
+
+body{
+    background-color: rgb(237, 62, 68);
+}
+
+
+canvas{
+  display: block;
+  position: absolute;
+  top: calc(50vh - 300px);
+  left: calc(50vw - 400px);
+}
