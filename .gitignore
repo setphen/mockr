@@ -1,7 +1,4 @@
 # os specific
 .DS_Store
 
-# deploy folder
-/dist
-
 node_modules
