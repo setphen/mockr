@@ -5,7 +5,7 @@ var dat = require('./vendor/dat.gui.js');
 
 //THREE.JS
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 45, 4/3, 0.1, 1000 );
+var camera = new THREE.PerspectiveCamera( 25, 4/3, 0.1, 1000 );
 
 var renderer = new THREE.WebGLRenderer({
   preserveDrawingBuffer: true,
@@ -13,18 +13,22 @@ var renderer = new THREE.WebGLRenderer({
   antialias: true
 });
 renderer.setPixelRatio(window.devicePixelRatio || 1);
-window.renderer = renderer;
 renderer.setSize( 800, 600 );
-renderer.setClearColor( 0xffffff, 0 );
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.shadowMap.renderSingleSided = false;
-renderer.shadowMap.rendereingleSided = false;
+renderer.setClearColor( 0xed3e44);
 document.body.appendChild( renderer.domElement );
 dropzone = renderer.domElement;
 window.dropzone = dropzone;
 dropzone.setAttribute("draggable", "true");
 
+
+
+var saveRenderer = new THREE.WebGLRenderer({
+  preserveDrawingBuffer: true,
+  alpha: true,
+  antialias: true
+});
+saveRenderer.setSize( 800*3, 600*3 );
+saveRenderer.setClearColor( 0xed3e44);
 
 //OFFSCREEN RENDER TARGET
 var renderBuffer = new THREE.WebGLRenderTarget({width:800*3, height:600*3});
@@ -42,7 +46,6 @@ dropzone.ondragover = function(e) {
 
 dropzone.ondrop = function (e) {
   e.preventDefault();
-  console.log(e);
 
   var file = e.dataTransfer.files[0];
   reader = new FileReader();
@@ -52,6 +55,7 @@ dropzone.ondrop = function (e) {
     texture = new THREE.Texture(image);
     image.onload = function()  {
       plane.scale.x = image.width/image.height;
+      shadowPlane.scale.y = 2 * image.width/image.height;
       texture.needsUpdate = true;
     };
     image.src = data;
@@ -83,48 +87,56 @@ var plane;
 
 var geom = new THREE.PlaneGeometry(1,1);
 plane = new THREE.Mesh( geom, material );
-plane.castShadow = true;
 scene.add( plane );
+plane.position.z = 0.5;
+plane.position.y = -0.015;
+plane.rotation.x = Math.PI/2;
 
 var groundMaterial = new THREE.ShadowMaterial({opacity: 0.3});
 var groundGeom = new THREE.PlaneGeometry(40,40);
 groundPlane = new THREE.Mesh( groundGeom, groundMaterial );
-groundPlane.receiveShadow = true;
 scene.add( groundPlane );
 groundPlane.position.z = -2.9;
 // groundPlane.rotation.x = -0.6;
 
-camera.position.z = 2;
-// camera.rotation.x = 0.2;
+camera.position.z = 0.71;
+camera.position.y = -2.5;
+camera.position.x = 1.5;
+camera.up = new THREE.Vector3(0,0,1);
+camera.lookAt(new THREE.Vector3(0,0,0.5));
 
+var shadowTexture = new THREE.TextureLoader().load( 'assets/shadow.jpg' );
 
-shadowLight = new THREE.DirectionalLight( 0xffffff, 1, 100 );
-shadowLight.position.set( 1, 1, 23 );
-shadowLight.castShadow = true;            // default false
-scene.add(shadowLight);
-console.log(shadowLight.target);
+// immediately use the texture for material creation
+var shadowMaterial = new THREE.MeshBasicMaterial({
+  map: shadowTexture,
+  blending: THREE.MultiplyBlending,
+  transparent: true
+});
 
-shadowLight.shadow.mapSize.width = 2048;  // default
-shadowLight.shadow.mapSize.height = 2048; // default
-shadowLight.shadow.camera.near = 0.5;       // default
-shadowLight.shadow.camera.far = 100;      // default
-
-// var helper = new THREE.CameraHelper( shadowLight.shadow.camera );
-// scene.add( helper );
+shadowPlane =  new THREE.Mesh( geom, shadowMaterial );
+shadowPlane.scale.x = 3;
+shadowPlane.scale.y = 2;
+shadowPlane.position.z = -0.001;
+shadowPlane.rotation.z = Math.PI * 3/2;
+scene.add(shadowPlane);
 
 renderer.render( scene, camera );
 
 animate();
 
 function animate() {
-  requestAnimationFrame( animate );
+  setTimeout(function(){
+    requestAnimationFrame( animate );
+  }, 1000/30);
 
   renderer.render( scene, camera );
-  // renderer.render( scene, camera, renderBuffer);
 }
 
 window.ss = function(){
-  window.open(renderer.domElement.toDataURL("image/png"));
+  saveRenderer.render( scene, camera );
+  imgData = saveRenderer.domElement.toDataURL("image/png");
+  window.open(imgData);
 }
 
 

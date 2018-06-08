@@ -1,2 +1,2 @@
-body,html{margin:0;padding:0;overflow:hidden}body{background-color:#ed3e44}canvas{display:block;position:absolute;top:calc(50vh - 300px);left:calc(50vw - 400px)}
+body,html{font-family:monospace;color:#fff;margin:0;padding:1em;overflow:hidden}.header{max-width:20em;display:block}.header h3{letter-spacing:.1em}body{background-color:#ed3e44}canvas{display:block;position:absolute;top:calc(50vh - 300px);left:calc(50vw - 400px);z-index:-999}
 /*# sourceMappingURL=main.css.map */
