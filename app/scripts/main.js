@@ -1,10 +1,33 @@
 // REQUIREMENTS
-var THREE = require('three');
+var ColorPicker = require('simple-color-picker');
 var dat = require('./vendor/dat.gui.js');
+var THREE = require('three');
+
+
+//COLORPICKER
+function CreatePicker(element, color) {
+  let p = new ColorPicker({
+    color: color,
+    el: element,
+    width: 200,
+    height: 200
+  });
+
+  let h = document.createElement("textarea");
+  // h.setAttribute("readonly", false);
+  element.appendChild(h);
+
+  p.onChange(function (v) {
+    h.value = v;
+  })
+}
+
+var colorwindow = document.getElementById("colorwindow");
+CreatePicker(colorwindow, '#ff0000');
 
 //THREE.JS
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 25, 4/3, 0.1, 1000 );
+var camera = new THREE.PerspectiveCamera( 25, 2/1, 0.1, 1000 );
 
 var renderer = new THREE.WebGLRenderer({
   preserveDrawingBuffer: true,
@@ -12,7 +35,7 @@ var renderer = new THREE.WebGLRenderer({
   antialias: true
 });
 renderer.setPixelRatio(window.devicePixelRatio || 1);
-renderer.setSize( 800, 600 );
+renderer.setSize( 1200, 600 );
 renderer.setClearColor( 0xed3e44);
 document.body.appendChild( renderer.domElement );
 dropzone = renderer.domElement;
@@ -26,7 +49,7 @@ var saveRenderer = new THREE.WebGLRenderer({
   alpha: true,
   antialias: true
 });
-saveRenderer.setSize( 800*3, 600*3 );
+saveRenderer.setSize( 1200*3, 600*3 );
 saveRenderer.setClearColor( 0xed3e44);
 
 //OFFSCREEN RENDER TARGET
@@ -53,8 +76,16 @@ dropzone.ondrop = function (e) {
     var image = document.createElement( 'img' );
     texture = new THREE.Texture(image);
     image.onload = function()  {
+      plane.scale.y = 1;
       plane.scale.x = image.width/image.height;
+      shadowPlane.scale.x = 1;
       shadowPlane.scale.y = 2 * image.width/image.height;
+      if (plane.scale.x > 2){
+        plane.scale.x *= 0.5;
+        plane.scale.y *= 0.5;
+        shadowPlane.scale.x *= 0.5;
+        shadowPlane.scale.y *= 0.5;
+      }
       texture.needsUpdate = true;
     };
     image.src = data;
@@ -85,9 +116,10 @@ var material = new THREE.MeshBasicMaterial({side:THREE.DoubleSide});
 var plane;
 
 var geom = new THREE.PlaneGeometry(1,1);
+geom.applyMatrix( new THREE.Matrix4().makeTranslation(0,0.5,0) );
 plane = new THREE.Mesh( geom, material );
 scene.add( plane );
-plane.position.z = 0.5;
+// plane.position.z = 0;
 plane.position.y = -0.015;
 plane.rotation.x = Math.PI/2;
 
@@ -113,7 +145,8 @@ var shadowMaterial = new THREE.MeshBasicMaterial({
   transparent: true
 });
 
-shadowPlane =  new THREE.Mesh( geom, shadowMaterial );
+var shadowGeom = new THREE.PlaneGeometry(1,1);
+shadowPlane =  new THREE.Mesh( shadowGeom, shadowMaterial );
 shadowPlane.scale.x = 3;
 shadowPlane.scale.y = 2;
 shadowPlane.position.z = -0.001;

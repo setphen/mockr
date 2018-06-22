@@ -8,8 +8,13 @@
   },
   "author": "stephen lindberg",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/setphen/mockr.git"
+  },
   "dependencies": {
     "dat.gui": "^0.6.1",
+    "simple-color-picker": "^0.1.2",
     "three": "^0.87.1"
   },
   "devDependencies": {
